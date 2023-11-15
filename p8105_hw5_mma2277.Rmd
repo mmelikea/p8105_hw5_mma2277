@@ -21,6 +21,25 @@ library(tidyverse)
 ##### Tidy the result; manipulate file names to include control arm and subject ID, make sure weekly observations are “tidy”, and do any other tidying that’s necessary
 ##### Make a spaghetti plot showing observations on each subject over time, and comment on differences between groups.
 
+```{r, message=FALSE, warning=FALSE}
+# Start with a dataframe containing all file names; the list.files
+longstudy_files <- list.files("data", full.names = TRUE)
+
+# creating the function
+read_data_frames <-
+  function(file_path) {
+    long_data <- read_csv(file_path)
+    long_data <- mutate(long_data, treat_group = str_remove(basename(file_path), "\\.csv"))
+    long_data <- separate(long_data, treat_group, into = c("study_arm", "ID"), sep = "_")
+    return(long_data)
+  }
+
+# Iterate over file names and read in data for each subject using purrr::map
+list_datasets <- purrr::map(longstudy_files, ~read_data_frames(.))
+
+# Binding rows to merge datasets
+longstudy_combined_df <- bind_rows(list_datasets)
+```
 
 
 
